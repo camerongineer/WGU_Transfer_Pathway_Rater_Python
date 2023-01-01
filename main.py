@@ -1,4 +1,7 @@
 # budget == 5 == cheap / difficulty == 5 == easy / speed == 5 == fast to complete
+import json
+from typing import Dict
+
 reviewer_rating = {
     "Saylor Academy": {"budget": 5, "difficulty": 1, "speed": 3},
     "Sophia Learning": {"budget": 5, "difficulty": 5, "speed": 5},
@@ -44,7 +47,7 @@ def tabulate_rating(budget_importance: int, difficulty_importance: int, speed_im
     difficulty_score = school_ratings["difficulty"] * difficulty_importance
     speed_score = school_ratings["speed"] * speed_importance
     actual_tabulated_score = 5 / (max_point_total / (budget_score + difficulty_score + speed_score))
-    rounded_score = round(actual_tabulated_score * 4) / 4
+    rounded_score = round(actual_tabulated_score * 4) / 4  # rounds score to nearest .25
     return rounded_score
 
 
@@ -71,16 +74,60 @@ def print_hoots(rating: float, school_name: str):
     print(f"{school_name} has received a rating of {rating} hoots\n\n\n")
 
 
-def main():
-    print("\n\n\n")
+def set_all_importance_parameters() -> Dict[str, int]:
     importance_parameters = {
         "budget": get_parameter_importance("budget"),
         "difficulty": get_parameter_importance("difficulty"),
         "speed": get_parameter_importance("speed")}
+    save_importance_parameters(importance_parameters)
+    return importance_parameters
+
+
+def load_saved_importance_parameters() -> Dict[str, int]:
+    try:
+        with open("save_file.json", "r") as save_file:
+            save_file_data = json.load(save_file)
+            importance_parameters = {
+                "budget": int(save_file_data["budget"]),
+                "difficulty": int(save_file_data["difficulty"]),
+                "speed": int(save_file_data["speed"]),
+            }
+            valid_values = [1, 3, 5]
+            if (importance_parameters["budget"] not in valid_values
+                    or importance_parameters["difficulty"] not in valid_values
+                    or importance_parameters["speed"] not in valid_values):
+                raise IOError
+            reversed_importance_map = {1: "slightly", 3: "moderately", 5: "extremely"}
+            print(f"It is {reversed_importance_map[importance_parameters['budget']]} "
+                  "important to you that courses are cheap to take\n"
+                  f"It is {reversed_importance_map[importance_parameters['difficulty']]}"
+                  " important to you that courses are easy to complete\n"
+                  f"It is {reversed_importance_map[importance_parameters['speed']]} "
+                  "important to you that courses are fast to complete\n")
+            print("\n\nWould you like to change these parameters of importance for this review? (OPTIONS = y, n)")
+            answer = input()
+            while answer not in ["y", "n", "yes", "no"]:
+                print("That is not a valid choice, please answer 'y' for yes or 'n' for no")
+                answer = input()
+            if answer in ["yes", "y"]:
+                return set_all_importance_parameters()
+            else:
+                return importance_parameters
+    except IOError:
+        return set_all_importance_parameters()
+
+
+def save_importance_parameters(importance_parameters: Dict[str, int]):
+    with open("save_file.json", "w") as save_file:
+        json.dump(importance_parameters, save_file)
+
+
+def main():
+    print("\n\n\n")
+    importance_parameters = load_saved_importance_parameters()
     school_name = select_transfer_school()
     while school_name == "invalid":
         school_name = select_transfer_school()
-
     print_hoots(tabulate_rating(importance_parameters["budget"],
                                 importance_parameters["difficulty"],
                                 importance_parameters["speed"],
