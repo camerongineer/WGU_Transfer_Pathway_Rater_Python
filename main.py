@@ -104,7 +104,7 @@ def load_saved_importance_parameters() -> Dict[str, int]:
                   " important to you that courses are easy to complete\n"
                   f"It is {reversed_importance_map[importance_parameters['speed']]} "
                   "important to you that courses are fast to complete\n")
-            print("\n\nWould you like to change these parameters of importance for this review? (OPTIONS = y, n)")
+            print("\n\nWould you like to change these parameters of importance for this review? (OPTIONS = y, n): ", end="")
             answer = input()
             while answer not in ["y", "n", "yes", "no"]:
                 print("That is not a valid choice, please answer 'y' for yes or 'n' for no")
